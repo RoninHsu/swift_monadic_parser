@@ -11,5 +11,7 @@ A minium interpreter is also implemented in this tiny project.
 - Concise code which extremely easy to understand and modify.
 
 
-> Currently performance is pool, just in order to keep structure simple, there are lots of unoptimized string and array operation in the code.
- 
+## Drawbacks:
+
+- In order to keep it simple and stupid, there are lots of string construct operation, which has pool performance.
+- Same reason as above, there are lots of direct array construct/deconstruct operation, which has pool performance, consider replace it with swift lazy evaluation feature such as AnyGenerator/AnySequence if u want imporve it.
