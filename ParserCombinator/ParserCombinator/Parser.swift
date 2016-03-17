@@ -36,7 +36,7 @@ func isAlpha(c : Character) -> Bool{
 
 //MARK: Basic Element
 
-infix operator >>= {associativity left precedence 130}
+infix operator >>= {associativity left precedence 150}
 
 func >>= <a,b>(p : Parser<a>, f : a->Parser<b>) -> Parser<b>{
     return Parser { cs in
@@ -55,6 +55,11 @@ func >>= <a,b>(p : Parser<a>, f : a->Parser<b>) -> Parser<b>{
     }
 }
 
+func mzero<a>()->Parser<a>{
+    return Parser { xs in
+        return []
+    }
+}
 
 func pure<a>( item : a) -> Parser<a>{
     return Parser { cs in
@@ -161,7 +166,7 @@ func digit() -> Parser<Exp>{
 }
 
 func number() -> Parser<Exp>{
-    return many(digit()) >>= { cs in
+    return many1(digit()) >>= { cs in
         space() >>= { _ in
             let sum = cs.reduce(Exp.Constant(0), combine: { (exp1 , exp2 ) -> Exp in
                 return Exp.Constant((exp1.pConstant * 10 + exp2.pConstant))
@@ -193,7 +198,7 @@ func variables() -> Parser<Exp>{
 }
 
 func factor()->Parser<Exp>{
-    return variables() +++ number() +++ (symbol("(") >>= { _ in
+    return variables() +++ number() +++ (symbol("(") >>= { c in
         return expr() >>= { n in
             return symbol(")") >>= { _ in
                 return pure(n)
@@ -202,7 +207,122 @@ func factor()->Parser<Exp>{
     })
 }
 
-func expr() -> Parser<Exp>{
-
+func oper()->Parser<Character>{
+    return ["=","+","-","*","/"].map({ (x:String) -> Parser<Character> in
+        return parserChar(x.characters[x.characters.startIndex])
+    }).reduce(mzero()) { (x, y) -> Parser<Character> in
+        return x +++ y
+    }
 }
 
+func op()->Parser<String>{
+    return many1(oper()) >>= { xs in
+        return pure(String(xs))
+    }
+}
+
+infix operator >=< {associativity left precedence 130}
+
+func >=<<a>(p : Parser<a>, op : Parser<(a,a) -> a>) -> Parser<a>{
+    return p >>= { x in
+        return rest(p, x: x, op: op)
+    }
+}
+
+func rest<a>(p : Parser<a>, x : a, op : Parser<(a,a) -> a>) -> Parser<a>{
+    return op >>= { f in
+        p >>= { y in
+            return rest(p, x: f(x,y), op: op)
+        }
+    } +++ pure(x)
+}
+
+func addop() -> Parser<(Exp,Exp)->Exp>{
+    return symbol("+") >>= { _ in
+        return pure({(x,y) -> Exp in
+            return Exp.Add(x, y)
+        })
+    }
+}
+
+func mulop() -> Parser<(Exp,Exp) -> Exp>{
+    return symbol("*") >>= { _ in
+        return pure({ (x,y) -> Exp in
+            return Exp.Times(x, y)
+        })
+
+    }
+}
+
+func relop() -> Parser<(Exp,Exp) -> Exp>{
+    return symbol("<") >>= { _ in
+        return pure({(x,y) -> Exp in
+            return Exp.Less(x, y)
+        })
+    }
+}
+
+func expr() -> Parser<Exp>{
+    return term() >=< addop()
+}
+
+func rexp() -> Parser<Exp>{
+    return expr() >=< relop()
+}
+
+func term() -> Parser<Exp>{
+    return factor() >=< mulop()
+}
+
+
+//MARK: handle statement
+
+func assign() -> Parser<Com>{
+    return identifier() >>= { name in
+        return symbol("=") >>= { _ in
+            return expr() >>= { exp in
+                return pure(Com.Assign(name, exp))
+            }
+        }
+    }
+}
+
+func com() -> Parser<Com>{
+    return seq() +++ com1()
+}
+
+func com1() -> Parser<Com>{
+    return assign() +++ whileloop() +++ print()
+}
+
+
+func whileloop() -> Parser<Com>{
+    return symbol("while") >>= { _ in
+        return rexp() >>= { cond in
+            return symbol("{") >>= { _ in
+                return com() >>= { stmt in
+                    return symbol("}") >>= { _ in
+                        return pure(Com.While(cond, stmt))
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+func print() -> Parser<Com>{
+    return symbol("print") >>= { _ in
+        return expr() >>= { exp in
+            return pure(Com.Print(exp))
+        }
+    }
+}
+
+func seq() -> Parser<Com>{
+    return com1() >>= { stmt in
+        return com() >>= { stmt2 in
+            return pure(Com.Seq(stmt, stmt2))
+        }
+    }
+}

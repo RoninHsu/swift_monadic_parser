@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7519A8D41C9AF1BB00C41F51 /* Interpreter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7519A8D31C9AF1BB00C41F51 /* Interpreter.swift */; };
 		756E43971C99B3F0009F5C71 /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 756E43961C99B3F0009F5C71 /* Parser.swift */; };
 		756E43991C99B40E009F5C71 /* Syntax.swift in Sources */ = {isa = PBXBuildFile; fileRef = 756E43981C99B40E009F5C71 /* Syntax.swift */; };
 		BC27381F1C98F6C90094C799 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC27381E1C98F6C90094C799 /* main.swift */; };
@@ -25,6 +26,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		7519A8D31C9AF1BB00C41F51 /* Interpreter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Interpreter.swift; sourceTree = "<group>"; };
 		756E43961C99B3F0009F5C71 /* Parser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
 		756E43981C99B40E009F5C71 /* Syntax.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Syntax.swift; sourceTree = "<group>"; };
 		BC27381B1C98F6C90094C799 /* ParserCombinator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ParserCombinator; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -64,6 +66,7 @@
 				BC27381E1C98F6C90094C799 /* main.swift */,
 				756E43961C99B3F0009F5C71 /* Parser.swift */,
 				756E43981C99B40E009F5C71 /* Syntax.swift */,
+				7519A8D31C9AF1BB00C41F51 /* Interpreter.swift */,
 			);
 			path = ParserCombinator;
 			sourceTree = "<group>";
@@ -125,6 +128,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7519A8D41C9AF1BB00C41F51 /* Interpreter.swift in Sources */,
 				756E43991C99B40E009F5C71 /* Syntax.swift in Sources */,
 				756E43971C99B3F0009F5C71 /* Parser.swift in Sources */,
 				BC27381F1C98F6C90094C799 /* main.swift in Sources */,

@@ -14,8 +14,10 @@ indirect enum Exp{
     case Constant (Int)
     case Var (String)
     case Add (Exp,Exp)
+    case Times (Exp,Exp)
     case Equal (Exp,Exp)
-
+    case Greater (Exp,Exp)
+    case Less (Exp,Exp)
 
     var pConstant : Int {
         switch self{
@@ -31,5 +33,6 @@ indirect enum Com{
     case Assign (String,Exp)
     case Seq (Com,Com)
     case Cond (Exp,Com,Com)
-    case For (String,Exp,Exp,Exp,Com)
+    case While (Exp,Com)
+    case Print (Exp)
 }
