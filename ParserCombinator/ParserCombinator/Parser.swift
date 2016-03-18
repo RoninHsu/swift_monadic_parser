@@ -56,15 +56,11 @@ func >>= <a,b>(p : Parser<a>, f : a->Parser<b>) -> Parser<b>{
 }
 
 func mzero<a>()->Parser<a>{
-    return Parser { xs in
-        return []
-    }
+    return Parser { xs in [] }
 }
 
 func pure<a>( item : a) -> Parser<a>{
-    return Parser { cs in
-        return [(item,cs)]
-    }
+    return Parser { cs in [(item,cs)] }
 }
 
 func satify(condition : Character -> Bool) -> Parser<Character>{
@@ -99,8 +95,8 @@ func many<a>(p: Parser<a>) -> Parser<[a]>{
 
 func many1<a>(p : Parser<a>) -> Parser<[a]>{
     return p >>= { x in
-        return many(p) >>= { xs in
-            return pure([x] + xs)
+        many(p) >>= { xs in
+            pure([x] + xs)
         }
     }
 }
@@ -141,15 +137,13 @@ func string(str : String) -> Parser<String>{
 }
 
 func space()->Parser<String>{
-    return many(satify(isSpace)) >>= { x in
-        return pure("")
-    }
+    return many(satify(isSpace)) >>= { x in pure("") }
 }
 
 func symbol(sym : String) -> Parser<String>{
     return string(sym) >>= { sym in
-        return space() >>= { _ in
-            return pure(sym)
+        space() >>= { _ in
+            pure(sym)
         }
     }
 }
@@ -160,8 +154,7 @@ func symbol(sym : String) -> Parser<String>{
 //MARK: process numbers
 func digit() -> Parser<Exp>{
     return satify(isDigit) >>= { x in
-        let p = Exp.Constant(Int(String(x))!)
-        return pure(p)
+        pure(Exp.Constant(Int(String(x))!))
     }
 }
 
@@ -181,11 +174,9 @@ func number() -> Parser<Exp>{
 
 func identifier() -> Parser<String>{
     return satify(isAlpha) >>= { c in
-        return many(satify({ (c) -> Bool in
-            return isAlpha(c) || isDigit(c)
-        })) >>= { cs in
-            return space() >>= { _ in
-                return pure(String([c] + cs))
+        many(satify({ (c) -> Bool in isAlpha(c) || isDigit(c) })) >>= { cs in
+            space() >>= { _ in
+                pure(String([c] + cs))
             }
         }
     }
@@ -193,15 +184,15 @@ func identifier() -> Parser<String>{
 
 func variables() -> Parser<Exp>{
     return identifier() >>= { name in
-        return pure(Exp.Var(name))
+        pure(Exp.Var(name))
     }
 }
 
 func factor()->Parser<Exp>{
     return variables() +++ number() +++ (symbol("(") >>= { c in
-        return expr() >>= { n in
-            return symbol(")") >>= { _ in
-                return pure(n)
+        expr() >>= { n in
+            symbol(")") >>= { _ in
+                pure(n)
             }
         }
     })
@@ -209,9 +200,9 @@ func factor()->Parser<Exp>{
 
 func oper()->Parser<Character>{
     return ["=","+","-","*","/"].map({ (x:String) -> Parser<Character> in
-        return parserChar(x.characters[x.characters.startIndex])
+        parserChar(x.characters[x.characters.startIndex])
     }).reduce(mzero()) { (x, y) -> Parser<Character> in
-        return x +++ y
+        x +++ y
     }
 }
 
@@ -225,30 +216,30 @@ infix operator >=< {associativity left precedence 130}
 
 func >=<<a>(p : Parser<a>, op : Parser<(a,a) -> a>) -> Parser<a>{
     return p >>= { x in
-        return rest(p, x: x, op: op)
+        rest(p, x: x, op: op)
     }
 }
 
 func rest<a>(p : Parser<a>, x : a, op : Parser<(a,a) -> a>) -> Parser<a>{
     return op >>= { f in
         p >>= { y in
-            return rest(p, x: f(x,y), op: op)
+            rest(p, x: f(x,y), op: op)
         }
     } +++ pure(x)
 }
 
 func addop() -> Parser<(Exp,Exp)->Exp>{
     return symbol("+") >>= { _ in
-        return pure({(x,y) -> Exp in
-            return Exp.Add(x, y)
+        pure({(x,y) -> Exp in
+            Exp.Add(x, y)
         })
     }
 }
 
 func mulop() -> Parser<(Exp,Exp) -> Exp>{
     return symbol("*") >>= { _ in
-        return pure({ (x,y) -> Exp in
-            return Exp.Times(x, y)
+        pure({ (x,y) -> Exp in
+            Exp.Times(x, y)
         })
 
     }
@@ -256,8 +247,8 @@ func mulop() -> Parser<(Exp,Exp) -> Exp>{
 
 func relop() -> Parser<(Exp,Exp) -> Exp>{
     return symbol("<") >>= { _ in
-        return pure({(x,y) -> Exp in
-            return Exp.Less(x, y)
+        pure({(x,y) -> Exp in
+            Exp.Less(x, y)
         })
     }
 }
@@ -279,9 +270,9 @@ func term() -> Parser<Exp>{
 
 func assign() -> Parser<Com>{
     return identifier() >>= { name in
-        return symbol("=") >>= { _ in
-            return expr() >>= { exp in
-                return pure(Com.Assign(name, exp))
+        symbol("=") >>= { _ in
+            expr() >>= { exp in
+                pure(Com.Assign(name, exp))
             }
         }
     }
@@ -298,11 +289,11 @@ func com1() -> Parser<Com>{
 
 func whileloop() -> Parser<Com>{
     return symbol("while") >>= { _ in
-        return rexp() >>= { cond in
-            return symbol("{") >>= { _ in
-                return com() >>= { stmt in
-                    return symbol("}") >>= { _ in
-                        return pure(Com.While(cond, stmt))
+        rexp() >>= { cond in
+            symbol("{") >>= { _ in
+                com() >>= { stmt in
+                    symbol("}") >>= { _ in
+                        pure(Com.While(cond, stmt))
                     }
                 }
             }
@@ -313,16 +304,16 @@ func whileloop() -> Parser<Com>{
 
 func print() -> Parser<Com>{
     return symbol("print") >>= { _ in
-        return expr() >>= { exp in
-            return pure(Com.Print(exp))
+        expr() >>= { exp in
+            pure(Com.Print(exp))
         }
     }
 }
 
 func seq() -> Parser<Com>{
     return com1() >>= { stmt in
-        return com() >>= { stmt2 in
-            return pure(Com.Seq(stmt, stmt2))
+        com() >>= { stmt2 in
+            pure(Com.Seq(stmt, stmt2))
         }
     }
 }

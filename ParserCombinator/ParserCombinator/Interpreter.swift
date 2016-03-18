@@ -31,7 +31,7 @@ func eval(exp : Exp) -> Int{
             return 1
         }
     case let Exp.Times(exp1, exp2):
-        return eval(exp1) + eval(exp2)
+        return eval(exp1) * eval(exp2)
     default:
         return 0
     }
