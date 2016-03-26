@@ -63,7 +63,7 @@ func pure<a>( item : a) -> Parser<a>{
     return Parser { cs in [(item,cs)] }
 }
 
-func satify(condition : Character -> Bool) -> Parser<Character>{
+func satisfy(condition : Character -> Bool) -> Parser<Character>{
     return Parser { x in
         guard let head = x.characters.first where condition(head) else{
             return []
@@ -107,8 +107,18 @@ func parserChar(c : Character) -> Parser<Character>{
             return []
         }
         return [(c,String(x.characters.dropFirst()))]
-
     }
+}
+
+func parserCharA() -> Parser<Character>{
+    let parser =  Parser<Character> { x in
+        guard let head = x.characters.first where head == "a" else{
+            return []
+        }
+        return [("a",String(x.characters.dropFirst()))]
+    }
+
+    return parser
 }
 
 func parse<a>(parser : Parser<a> , input: String) -> [(a,String)]{
@@ -137,7 +147,7 @@ func string(str : String) -> Parser<String>{
 }
 
 func space()->Parser<String>{
-    return many(satify(isSpace)) >>= { x in pure("") }
+    return many(satisfy(isSpace)) >>= { x in pure("") }
 }
 
 func symbol(sym : String) -> Parser<String>{
@@ -153,7 +163,7 @@ func symbol(sym : String) -> Parser<String>{
 
 //MARK: process numbers
 func digit() -> Parser<Exp>{
-    return satify(isDigit) >>= { x in
+    return satisfy(isDigit) >>= { x in
         pure(Exp.Constant(Int(String(x))!))
     }
 }
@@ -173,8 +183,8 @@ func number() -> Parser<Exp>{
 //MARK: handle expression
 
 func identifier() -> Parser<String>{
-    return satify(isAlpha) >>= { c in
-        many(satify({ (c) -> Bool in isAlpha(c) || isDigit(c) })) >>= { cs in
+    return satisfy(isAlpha) >>= { c in
+        many(satisfy({ (c) -> Bool in isAlpha(c) || isDigit(c) })) >>= { cs in
             space() >>= { _ in
                 pure(String([c] + cs))
             }
