@@ -79,8 +79,9 @@ func satisfy(condition : Character -> Bool) -> Parser<Character>{
 infix operator +++ {associativity left precedence 130}
 func +++ <a>(l : Parser<a>, r:Parser<a>) -> Parser<a>   {
     return Parser { x in
-        if l.p(x).count > 0{
-            return l.p(x)
+        let result = l.p(x)
+        if result.count > 0{
+            return result
         }else{
             return r.p(x)
         }
