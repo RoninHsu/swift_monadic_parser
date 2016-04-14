@@ -3,6 +3,14 @@ A simple haskell-style monadic combinator-based parser written in Swift.
 
 A minium interpreter is also implemented in this tiny project.
 
+## Try 
+
+```swift
+let c: String = " i = 0 print i sum = 0 while i<100  {sum=sum+i i=i+1 }   print sum"
+let ast = (space() >>= {_ in com()}).p(c)[0].0
+interpreter(ast)
+```
+
 ## Features:
 
 - Pure parser process without any side effects.
